@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <SPI.h>
 
+int key;
 
 void setup() {
   // initialize the robot
@@ -12,6 +13,24 @@ void setup() {
   // setup colors
   Robot.stroke(0,0,0);
   Robot.fill(255,200,200);
+
+  Robot.text("Press left or right!", 10, 10);
+  key = Robot.keyboardRead();
+  while(key != BUTTON_LEFT && key != BUTTON_RIGHT){
+    delay(50);
+    key = Robot.keyboardRead();
+  }
+  Robot.text(key == BUTTON_LEFT ? "LEFT" : "RIGHT", 10, 20);
+}
+
+int countBlack(uint16_t* a){
+  int count = 0;
+  for (int i=1; i<5;i++){
+    if (a[i] <= 450){
+      count++;
+    }
+  }
+  return count;
 }
 
 int mini(uint16_t* a){
@@ -36,6 +55,9 @@ unsigned long time;
 unsigned long timeSum;
 
 int multiplier = 25;
+
+unsigned long lineLastSeen = millis();
+int uTurn = 0;
 
 void turn(int dir) {
   if (n%renderF==0){
@@ -95,6 +117,7 @@ void loop() {
   
   int mindex = mini(Robot.IRarray);
   int minvalue = (int)Robot.IRarray[mindex];
+  int ircount = countBlack(Robot.IRarray);
   
   if (n%renderF==0){
     Robot.rect(0, 0, 80, 120); 
@@ -104,7 +127,42 @@ void loop() {
     Robot.text(n,20,80);
   }
 
+  if(ircount > 1){
+    Robot.text("JUNCTION",20,110);
+    
+    Robot.motorsWrite(-70,-70);
+    delay(50);
+    Robot.motorsStop();
+  
+    if(key == BUTTON_LEFT){
+      int leftmost = 0;
+
+      for (int i=0; i<5;i++){
+        if (Robot.IRarray[i] <= 450){
+          leftmost = i;
+        }
+      }
+      
+      Robot.turn(-8*leftmost);
+    }else{
+      int rightmost = 4;
+
+      for (int i=4; i>=0;i--){
+        if (Robot.IRarray[i] <= 450){
+          rightmost = i;
+        }
+      }
+      Robot.rect(0, 0, 128, 160); 
+      Robot.text(rightmost,30,50);
+      
+      Robot.turn(8*(4-rightmost));
+    }
+    return;   
+  }
+
   if (minvalue<=450){
+    lineLastSeen = millis();
+    uTurn = 0;
     if (mindex==2){
       setMotorPower(4.8*multiplier, 4.8*multiplier);
       setLastMotors(4.8*multiplier, 4.8*multiplier);
@@ -126,7 +184,27 @@ void loop() {
     }
   }
   else{
-    setMotorPower(lastLeftMotor, lastRightMotor);
+    if(uTurn == 1){ 
+      Robot.rect(0, 0, 128, 160); 
+      Robot.text("TURNING",10,100);      
+      Robot.turn(180);
+      Robot.text("GTFO",10,100);      
+      uTurn = 2;
+    }else if(uTurn == 2){ 
+      setMotorPower(4.8*multiplier, 4.8*multiplier);
+      setLastMotors(4.8*multiplier, 4.8*multiplier);
+    }else if(millis() - lineLastSeen > 1000){
+      Robot.rect(0, 0, 128, 160); 
+      Robot.text("BACKING UP",10,100);
+
+      Robot.motorsWrite(-lastLeftMotor*0.5, -lastRightMotor*0.5);
+      delay(1000);
+      Robot.motorsStop();
+
+      uTurn = 1;
+    }else{
+      setMotorPower(lastLeftMotor, lastRightMotor);
+    }
   }
 }
 
