@@ -31,34 +31,31 @@ int lastRightMotor = 50;
 int right = 1;
 int left = -1;
 
-void straight() {
-      if (n%10==0){
-        Robot.text("Middle", 10, 50);
-      }
-      Robot.motorsWrite(75, 75);
-      
-      lastLeftMotor = 75;
-      lastRightMotor = 75;
-}
-
-void turn(int direction) {
+void turn(int dir) {
   if (n%10==0){
-    Robot.text(direction == right ? "Right" : "Left", 10, 50);
+    Robot.text(dir == right ? "Right" : "Left", 10, 50);
   }
   //Robot.motorStop();
   int p1 = 85;
   int p2 = -20;
-  setMotorPower(getPowerLevel(p1, p2, direction), getPowerLevel(p2, p1, direction));
+  setMotorPower(getPowerLevel(p1, p2, dir), getPowerLevel(p2, p1, dir));
+  setLastMotors(getPowerLevel(p1, p2, dir), getPowerLevel(p2, p1, dir));
 }
 
-void turnHard(int direction) {
+void turnHard(int dir) {
   if (n%10==0){
-    Robot.text(direction == right ? "Right H" : "Left H", 10, 50);
+    Robot.text(dir == right ? "Right H" : "Left H", 10, 50);
   }
   //Robot.motorStop();
   int p1 = 85;
   int p2 = -40;
-  setMotorPower(getPowerLevel(p1, p2, direction), getPowerLevel(p2, p1, direction));
+  setMotorPower(getPowerLevel(p1, p2, dir), getPowerLevel(p2, p1, dir));
+  setLastMotors(getPowerLevel(p1, p2, dir), getPowerLevel(p2, p1, dir));
+}
+
+void setLastMotors(int p1, int p2){
+  lastLeftMotor = p1;
+  lastRightMotor = p2;
 }
 
 int getPowerLevel(int p1, int p2, int dir) {
@@ -71,17 +68,14 @@ int getPowerLevel(int p1, int p2, int dir) {
 }
 
 void setMotorPower(int m1, int m2){
-  Robot.motorsWrite(m1, m2);
-  //delay(150);
-  //Robot.motorsStop();
-  
-  lastLeftMotor = m1;
-  lastRightMotor = m2;
-
   if (n%10==0){
     Robot.text(m1, 10, 100);
     Robot.text(m2, 10, 110);
   }
+  
+  Robot.motorsWrite(m1, m2);
+  //delay(150);
+  //Robot.motorsStop();
 }
 
 void loop() {
@@ -100,7 +94,8 @@ void loop() {
 
   if (minvalue<=450){
     if (mindex==2){
-      straight();
+      setMotorPower(75, 75);
+      setLastMotors(75,75);
     }
     else if (mindex==1){
       turn(right);
