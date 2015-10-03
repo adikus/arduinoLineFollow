@@ -44,6 +44,11 @@
  */
 
 #include <ArduinoRobot.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <stdio.h>
+
+int n = -1;
 
 void setup() {
   // initialize the robot
@@ -54,9 +59,18 @@ void setup() {
 }
 
 void loop() {
+  n++;
+  Robot.fill(255,255,200);
+  char filename[12];
+  snprintf(filename, sizeof filename, "santa-%d.bmp", n);
+  Robot.drawBMP(filename, 14, 80);
+  
   // array containing the melody
   char aTinyMelody[] = "8g--g-f-cggaf--ddgga-f--fefed----a--g---daAag---fefee-f-e-c-e-c--";
 
+  if(n==3){
+    n = -1;
+  }
   // play the melody
   Robot.playMelody(aTinyMelody);
 }
