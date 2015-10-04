@@ -49,7 +49,7 @@ int mini(uint16_t* a){
 }
 
 int n = 0;
-int renderF = 1000;
+int renderF = 200;
 
 int lastLeftMotor = 50;
 int lastRightMotor = 50;
@@ -59,8 +59,10 @@ int left = -1;
 unsigned long time;
 unsigned long timeSum;
 
-int multiplier = 25;
+int multiplier = 30;
 int turbo = 0;
+int start = 0;
+int turnAround = 0;
 
 unsigned long lineLastSeen = millis();
 int uTurn = 0;
@@ -120,39 +122,40 @@ void loop() {
   time = millis();
   
   Robot.updateIR();
-  int valA = digitalRead(pinA);
+  multiplier = 25 + digitalRead(pinA)*5;
   int valB = digitalRead(pinB);
-  int valC = digitalRead(pinC);
-  int valD = digitalRead(pinD);
+  start = digitalRead(pinC);
+  turnAround = digitalRead(pinD);
 
   if(valB == 0){
     key = BUTTON_LEFT;
   }else{
     key = BUTTON_RIGHT;
   }
-
-  turbo = valA;
   
   int mindex = mini(Robot.IRarray);
   int minvalue = (int)Robot.IRarray[mindex];
   int ircount = countBlack(Robot.IRarray);
-/*
-  Robot.rect(0, 0, 80, 120); 
-  Robot.text(valA,20,10);
-  Robot.text(key == BUTTON_LEFT ? "LEFT" : "RIGHT",20,20);
-  return;*/
   
   if (n%renderF==0){
     Robot.rect(0, 0, 80, 120); 
     Robot.text(minvalue,20,10);
     Robot.text(mindex,20,20);
-    Robot.text((int)(timeSum/(n-1)),20,70);
-    Robot.text(n,20,80);
+    Robot.text(multiplier,20,30);
+    
+    Robot.text((int)(timeSum/(n-1)),20,40);
+    Robot.text(n,20,50);
+    Robot.text(key == BUTTON_LEFT ? "LEFT" : "RIGHT", 20, 70);
+    if(ircount > 1)Robot.text("JUNCTION",20,80);
   }
 
-  if(ircount > 1){
-    Robot.text("JUNCTION",20,110);
-    
+  if(!start){
+    Robot.rect(0, 0, 80, 120); 
+    Robot.text("Pause",20,10);
+    return;
+  }
+
+  if(ircount > 1){    
     Robot.motorsWrite(-70,-70);
     delay(50);
     Robot.motorsStop();
@@ -175,8 +178,6 @@ void loop() {
           rightmost = i;
         }
       }
-      Robot.rect(0, 0, 128, 160); 
-      Robot.text(rightmost,30,50);
       
       Robot.turn(8*(4-rightmost));
     }
@@ -207,7 +208,7 @@ void loop() {
     }
   }
   else{
-    if(uTurn == 1){ 
+    /*if(uTurn == 1){ 
       Robot.rect(0, 0, 128, 160); 
       Robot.text("TURNING",10,100);      
       Robot.turn(180);
@@ -225,9 +226,9 @@ void loop() {
       Robot.motorsStop();
 
       uTurn = 1;
-    }else{
+    }else{*/
       setMotorPower(lastLeftMotor, lastRightMotor);
-    }
+    //}
   }
 }
 
