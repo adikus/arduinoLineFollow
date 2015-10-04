@@ -27,11 +27,14 @@ int turnAround = 0;
 unsigned long lineLastSeen = millis();
 int uTurn = 0;
 
+boolean music_on = false;
+
 void setup() {
   // initialize the robot
   Robot.begin();
   Robot.beginTFT();
   Robot.beginSpeaker();
+  Robot.beginSD();
   
   // setup colors
   Robot.stroke(0,0,0);
@@ -132,11 +135,18 @@ void loop() {
   }
 
   if (digitalRead(pinD)==1){
+    if (!music_on) {
+      Robot.playFile("melody.sqm");
+      music_on = true;
+    }
     Robot.motorsWrite(255,-255);
     delay(2000);
     Robot.motorsWrite(-255,255);
     delay(2000);
     Robot.motorsStop();
+  } else if (digitalRead(pinD)==0 && music_on) {
+    Robot.stopPlayFile();
+    music_on = false;
   }
   
   if(!start){
