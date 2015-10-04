@@ -7,6 +7,7 @@ int ledPin = 13;  // use the built in LED on pin 13 of the Uno
 int leftLedPin = 6;
 int rightLedPin = 10;
 int state = 0;
+boolean disco = false;
 
 void setup() {
     // sets the pins as outputs:
@@ -56,10 +57,18 @@ void loop() {
         break;
       case '6':
         analogWrite(pinD, 0);
+        disco = false;
+        analogWrite(pinB, 0); //back to default
+        leftLed();
         break;
       case '7':
         analogWrite(pinD, 255);
+        disco = true;
         break;
+    }
+    
+    if (disco) {
+      discoMode();
     }
     
 }
@@ -72,5 +81,12 @@ void leftLed() {
 void rightLed() {
   analogWrite(leftLedPin, 0);
   analogWrite(rightLedPin, 255);
+}
+
+void discoMode() {
+  leftLed();
+  delay(250);
+  rightLed();
+  delay(250);
 }
 
