@@ -2,6 +2,11 @@
 #include <Wire.h>
 #include <SPI.h>
 
+int pinA = TKD3;
+int pinB = TKD4;
+int pinC = TKD5;
+int pinD = TKD1;
+
 int key;
 
 void setup() {
@@ -14,13 +19,13 @@ void setup() {
   Robot.stroke(0,0,0);
   Robot.fill(255,200,200);
 
-  Robot.text("Press left or right!", 10, 10);
+  /*Robot.text("Press left or right!", 10, 10);
   key = Robot.keyboardRead();
   while(key != BUTTON_LEFT && key != BUTTON_RIGHT){
     delay(50);
     key = Robot.keyboardRead();
   }
-  Robot.text(key == BUTTON_LEFT ? "LEFT" : "RIGHT", 10, 20);
+  Robot.text(key == BUTTON_LEFT ? "LEFT" : "RIGHT", 10, 20);*/
 }
 
 int countBlack(uint16_t* a){
@@ -55,6 +60,7 @@ unsigned long time;
 unsigned long timeSum;
 
 int multiplier = 25;
+int turbo = 0;
 
 unsigned long lineLastSeen = millis();
 int uTurn = 0;
@@ -114,10 +120,27 @@ void loop() {
   time = millis();
   
   Robot.updateIR();
+  int valA = digitalRead(pinA);
+  int valB = digitalRead(pinB);
+  int valC = digitalRead(pinC);
+  int valD = digitalRead(pinD);
+
+  if(valB == 0){
+    key = BUTTON_LEFT;
+  }else{
+    key = BUTTON_RIGHT;
+  }
+
+  turbo = valA;
   
   int mindex = mini(Robot.IRarray);
   int minvalue = (int)Robot.IRarray[mindex];
   int ircount = countBlack(Robot.IRarray);
+/*
+  Robot.rect(0, 0, 80, 120); 
+  Robot.text(valA,20,10);
+  Robot.text(key == BUTTON_LEFT ? "LEFT" : "RIGHT",20,20);
+  return;*/
   
   if (n%renderF==0){
     Robot.rect(0, 0, 80, 120); 
@@ -164,8 +187,8 @@ void loop() {
     lineLastSeen = millis();
     uTurn = 0;
     if (mindex==2){
-      setMotorPower(4.8*multiplier, 4.8*multiplier);
-      setLastMotors(4.8*multiplier, 4.8*multiplier);
+      setMotorPower(4.8*multiplier + turbo*50, 4.8*multiplier + turbo*50);
+      setLastMotors(4.8*multiplier + turbo*50, 4.8*multiplier + turbo*50);
     }
     else if (mindex==1){
       turn(right);
