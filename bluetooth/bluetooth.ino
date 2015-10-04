@@ -1,9 +1,11 @@
 
 int pinA = 12;
 int pinB = 3;
-int pinC = 2;
+int pinC = 4;
 int pinD = 9;
 int ledPin = 13;  // use the built in LED on pin 13 of the Uno
+int leftLedPin = 6;
+int rightLedPin = 10;
 int state = 0;
 
 void setup() {
@@ -13,6 +15,9 @@ void setup() {
     pinMode(pinC, OUTPUT);
     pinMode(pinD, OUTPUT);
     pinMode(ledPin, OUTPUT);
+    pinMode(leftLedPin, OUTPUT);
+    pinMode(rightLedPin, OUTPUT);
+    leftLed();
 
     Serial.begin(9600); // Default connection rate for my BT module
 }
@@ -37,9 +42,11 @@ void loop() {
         break;
       case '2':
         analogWrite(pinB, 0);
+        leftLed();
         break;
       case '3':
         analogWrite(pinB, 255);
+        rightLed();
         break;
       case '4':
         analogWrite(pinC, 0);
@@ -55,5 +62,15 @@ void loop() {
         break;
     }
     
+}
+
+void leftLed() {
+  analogWrite(leftLedPin, 255);
+  analogWrite(rightLedPin, 0);
+}
+
+void rightLed() {
+  analogWrite(leftLedPin, 0);
+  analogWrite(rightLedPin, 255);
 }
 
