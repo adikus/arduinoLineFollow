@@ -1,7 +1,7 @@
 
 int pinA = 12;
-int pinB = 11;
-int pinC = 10;
+int pinB = 3;
+int pinC = 2;
 int pinD = 9;
 int ledPin = 13;  // use the built in LED on pin 13 of the Uno
 int state = 0;
