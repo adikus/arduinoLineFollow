@@ -1,11 +1,7 @@
 
 #include <ArduinoRobot.h>
-#include <NewPing.h>
 
 int TRIGGER_PIN = 12;
-int ECHO_PIN = 11;
-int MAX_DISTANCE = 200;
-NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
 void setup() {
   // initialize the robot
@@ -13,10 +9,13 @@ void setup() {
 
   // initialize the screen
   Robot.beginTFT();
+  pinMode(TRIGGER_PIN, INPUT); 
 }
 void loop() {
   delay(5); // Wait 50ms between pings (about 20 pings/sec). 29ms should be the shortest delay between pings.
-  unsigned int uS = sonar.ping();
-  Robot.stroke(0, 0, 0);              // choose the color black
-  Robot.text("Hello World", 0, 0);  // print the text
+  int d = digitalRead(TRIGGER_PIN);
+  String dat = String(d);
+  char buf[25];
+  dat.toCharArray(buf,25);
+  Robot.text(buf, 0, 0);  // print the text
 }
