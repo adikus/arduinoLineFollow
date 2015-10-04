@@ -9,6 +9,24 @@ int pinD = TKD1;
 
 int key;
 
+int n = 0;
+int renderF = 1000;
+
+int lastLeftMotor = 50;
+int lastRightMotor = 50;
+
+int right = 1;
+int left = -1;
+unsigned long timeSum;
+
+int multiplier = 30;
+int turbo = 0;
+int start = 0;
+int turnAround = 0;
+
+unsigned long lineLastSeen = millis();
+int uTurn = 0;
+
 void setup() {
   // initialize the robot
   Robot.begin();
@@ -19,13 +37,6 @@ void setup() {
   Robot.stroke(0,0,0);
   Robot.fill(255,200,200);
 
-  /*Robot.text("Press left or right!", 10, 10);
-  key = Robot.keyboardRead();
-  while(key != BUTTON_LEFT && key != BUTTON_RIGHT){
-    delay(50);
-    key = Robot.keyboardRead();
-  }
-  Robot.text(key == BUTTON_LEFT ? "LEFT" : "RIGHT", 10, 20);*/
 }
 
 int countBlack(uint16_t* a){
@@ -48,24 +59,6 @@ int mini(uint16_t* a){
   return minidx;
 }
 
-int n = 0;
-int renderF = 200;
-
-int lastLeftMotor = 50;
-int lastRightMotor = 50;
-
-int right = 1;
-int left = -1;
-unsigned long time;
-unsigned long timeSum;
-
-int multiplier = 30;
-int turbo = 0;
-int start = 0;
-int turnAround = 0;
-
-unsigned long lineLastSeen = millis();
-int uTurn = 0;
 
 void turn(int dir) {
   if (n%renderF==0){
@@ -103,12 +96,7 @@ int getPowerLevel(int p1, int p2, int dir) {
     }
 }
 
-void setMotorPower(int m1, int m2){
-  if (n%renderF==0){
-    Robot.text(m1, 10, 100);
-    Robot.text(m2, 10, 110);
-  }
-  
+void setMotorPower(int m1, int m2){  
   Robot.motorsWrite(m1, m2);
   delay(50);
   Robot.motorsStop();
@@ -116,16 +104,11 @@ void setMotorPower(int m1, int m2){
 
 void loop() {  
   n++;
-  if(time != NULL){
-    timeSum += millis() - time;
-  }
-  time = millis();
-  
   Robot.updateIR();
   multiplier = 25 + digitalRead(pinA)*5;
   int valB = digitalRead(pinB);
   start = digitalRead(pinC);
-  turnAround = digitalRead(pinD);
+
 
   if(valB == 0){
     key = BUTTON_LEFT;
@@ -143,17 +126,25 @@ void loop() {
     Robot.text(mindex,20,20);
     Robot.text(multiplier,20,30);
     
-    Robot.text((int)(timeSum/(n-1)),20,40);
     Robot.text(n,20,50);
     Robot.text(key == BUTTON_LEFT ? "LEFT" : "RIGHT", 20, 70);
     if(ircount > 1)Robot.text("JUNCTION",20,80);
   }
 
+  if (digitalRead(pinD)==1){
+    Robot.motorsWrite(255,-255);
+    delay(2000);
+    Robot.motorsWrite(-255,255);
+    delay(2000);
+    Robot.motorsStop();
+  }
+  
   if(!start){
     Robot.rect(0, 0, 80, 120); 
     Robot.text("Pause",20,10);
     return;
   }
+  
 
   if(ircount > 1){    
     Robot.motorsWrite(-70,-70);
@@ -188,8 +179,8 @@ void loop() {
     lineLastSeen = millis();
     uTurn = 0;
     if (mindex==2){
-      setMotorPower(4.8*multiplier + turbo*50, 4.8*multiplier + turbo*50);
-      setLastMotors(4.8*multiplier + turbo*50, 4.8*multiplier + turbo*50);
+      setMotorPower(4.8*multiplier, 4.8*multiplier);
+      setLastMotors(4.8*multiplier, 4.8*multiplier);
     }
     else if (mindex==1){
       turn(right);
